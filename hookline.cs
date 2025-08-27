@@ -15,6 +15,8 @@ public class hookline : MonoBehaviour
     Vector3 VerticalAdjustment = new Vector3(4.165f, -1.25f, 9.0f);
     Vector3 HorizontalAdjustment = new Vector3(4.165f, -1.25f, 8.75f);
 
+    bool pullingBack = false;
+
     [SerializeField] GameObject pRef;
     string pDir;
 
@@ -30,12 +32,21 @@ public class hookline : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKey(KeyCode.Space))
+        if (pullingBack)
+        {
+            this.transform.localScale -= Distort;
+            this.transform.position -= Dislocate;
+
+            if (this.transform.localScale.x + this.transform.localScale.y + this.transform.localScale.z == 0) Destroy(this.gameObject);
+        }
+        else if (Input.GetKey(KeyCode.Space))
         {
             this.transform.localScale += Distort;
             this.transform.position += Dislocate;
         }
         else Destroy(this.gameObject);
+
+
     }
 
     void OnCollisionEnter(Collision c)
@@ -50,6 +61,14 @@ public class hookline : MonoBehaviour
             enemyBody.AddForce(pushDir, ForceMode.Impulse);
 
             Destroy(this.gameObject);
+        }
+        else if (c.gameObject.tag == "WorldObject")
+        {
+            pullingBack = true;
+            Rigidbody objectBody = c.gameObject.GetComponent<Rigidbody>();
+
+            objectBody.AddForce(pushDir * 3.0f * -1, ForceMode.Impulse);
+
         }
     }
 
